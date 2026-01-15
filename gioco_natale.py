@@ -1,6 +1,7 @@
 import arcade
 import random
 import time
+import math
 
 
 """
@@ -60,7 +61,7 @@ class BabboNatale(arcade.Window):
         self.setup()
 
     def setup(self):
-        self.background = arcade.load_texture("./assets/sfondo.jpg")
+        self.background = arcade.load_texture("./assets/sfondo gioco.png")
 
         self.babbo = arcade.Sprite("./assets/babbo.png", scale=1.0)
         self.babbo.center_x = 300
@@ -79,7 +80,7 @@ class BabboNatale(arcade.Window):
             is_golden = random.random() < 0.03
 
             if is_golden:
-                cookie = arcade.Sprite("./assets/golden_cookie.webp", scale=0.2)
+                cookie = arcade.Sprite("./assets/golden_cookie.png", scale=0.2)
                 cookie.valore = 100
                 cookie.spawn_time = time.time()
             else:
@@ -89,12 +90,18 @@ class BabboNatale(arcade.Window):
 
             cookie.center_x = random.randint(50, 550)
             cookie.center_y = random.randint(50, 550)
-
-            if abs(cookie.center_x - self.babbo.center_x) >= 100 and \
-               abs(cookie.center_y - self.babbo.center_y) >= 100:
+            
+            # Calcola la distanza tra Babbo Natale e il biscotto
+            distanza = math.sqrt(
+                (cookie.center_x - self.babbo.center_x)**2 + 
+                (cookie.center_y - self.babbo.center_y)**2
+            )
+            
+            # Crea il biscotto solo se la distanza è >= 100 pixel
+            if distanza >= 100:
                 valid_position = True
                 self.lista_cookie.append(cookie)
-
+                
     def on_draw(self):
         self.clear()
 
@@ -150,10 +157,10 @@ class BabboNatale(arcade.Window):
                 cookie.remove_from_sprite_lists()
                 self.biscotti_raccolti += 1
                 self.punteggio += cookie.valore
-
-            # REGOLA 6 ✅
-            self.cookie_spawn_count = self.biscotti_raccolti // 5 + 1
-
+                if self.punteggio > 0 and self.punteggio % 5 == 0:
+                    self.cookie_spawn_count += 1
+                else:
+                    self.cookie_spawn_count=1
             for _ in range(self.cookie_spawn_count):
                 self.crea_cookie()
 
